@@ -10,19 +10,19 @@ function update_system {
 }
 
 function update_hostname {
-	HOSTNAME="$1"
+    HOSTNAME="$1"
 
-	echo "$HOSTNAME" > /etc/hostname
-	hostname -F /etc/hostname
+    echo "$HOSTNAME" > /etc/hostname
+    hostname -F /etc/hostname
 }
 
 function add_user {
-	USERNAME="$1"
-	USERPASS="$2"
+    USERNAME="$1"
+    USERPASS="$2"
 
-	adduser $USERNAME --disabled-password --gecos ""
-	echo "$USERNAME:$USERPASS" | chpasswd
-	usermod -aG sudo $USERNAME
+    adduser $USERNAME --disabled-password --gecos ""
+    echo "$USERNAME:$USERPASS" | chpasswd
+    usermod -aG sudo $USERNAME
 }
 
 function add_pubkey {
@@ -67,7 +67,7 @@ function install_ufw {
 
 function install_apache {
     IPV4=$(hostname -I | cut -d ' ' -f 1)
-    
+
     apt-get install -y apache2
     cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.orginal
     cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.original 
@@ -79,12 +79,12 @@ function install_apache {
     sed -i -e "s/var\/www\/html/var\/www\/000-default/" /etc/apache2/sites-available/000-default.conf
     sed -i -e "s/www.example.com/$IPV4/" /etc/apache2/sites-available/000-default.conf
     sed -i -e "s/localhost/$IPV4/" /etc/apache2/sites-available/000-default.conf
-    
+
     rm -r /var/www/html
     echo "<?php echo '$IPV4'; ?>" > /var/www/000-default/index.php
 
     a2enmod rewrite
-   
+
     systemctl restart apache2 
 }
 
@@ -103,13 +103,13 @@ function install_php {
 function install_mysql {
     UN="$1"
     PW="$2"
-  
+
     echo "mysql-server mysql-server/root_password password $PW" | debconf-set-selections  
     echo "mysql-server mysql-server/root_password_again password $PW" | debconf-set-selections  
-    
+
     apt-get install -y mysql-server
     systemctl start mysql
-    
+
     echo 'creating user for  mysql...'
     mysql -uroot -p$PW -e "GRANT ALL ON *.* to '$UN' IDENTIFIED BY '$PW'";
 
@@ -123,7 +123,7 @@ function install_goaccess {
 }
 
 function provision {
-	HN="$1"
+    HN="$1"
     UN="$2"
     PW="$3"
     PK="$4"
@@ -142,7 +142,7 @@ function provision {
     install_certbot
     install_php
     install_mysql "$UN" "$PW"
-    
+
     echo "Rebooting..."
     reboot
 }
